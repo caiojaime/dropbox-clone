@@ -1,0 +1,23 @@
+{
+  "name": "dropbox-clone",
+  "version": "1.0.0",
+  "description": "Dropbox Clone is a service for storing and sharing files. It is based on the concept of cloud computing.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caiojaime/dropbox-clone"
+  },
+  "author": "Caio Jaime",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/caiojaime/dropbox-clone/issues"
+  },
+  "homepage": "https://github.com/caiojaime/dropbox-clone#readme",
+  "dependencies": {
+    "ionicons": "^2.0.1",
+    "bootstrap": "^4.1.0"
+  }
+}

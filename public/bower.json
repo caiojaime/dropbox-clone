@@ -1,0 +1,21 @@
+{
+  "name": "dropbox-clone",
+  "homepage": "https://github.com/caiojaime/dropbox-clone",
+  "authors": [
+    "Caio Jaime"
+  ],
+  "description": "Dropbox Clone is a service for storing and sharing files. It is based on the concept of cloud computing.",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Ionicons": "ionicons#^2.0.1",
+    "bootstrap": "^4.1.0"
+  }
+}
