@@ -11,6 +11,8 @@ class DropBoxController {
         this.fileNameEl = this.snackModalEl.querySelector('.filename');
         this.timeLeftEl = this.snackModalEl.querySelector('.timeleft');
         this.listFilesEl = document.querySelector('#list-of-files-and-directories');
+        this.btnRename = document.querySelector('#btn-rename');
+        this.btnDelete = document.querySelector('#btn-delete');
         this.connectFirebase();
         this.initEvents();
         this.redFiles();
@@ -34,11 +36,33 @@ class DropBoxController {
 
     }
 
-    initEvents(){
+    getSelection(){
 
+        return this.listFilesEl.querySelectorAll('.selected');
+
+    }
+
+    initEvents(){
+        
         this.listFilesEl.addEventListener('selectionchange', e=>{
 
-            console.log('selectonchenge');
+            switch (this.getSelection().length){
+               
+                case 0:
+                    this.btnRename.style.display = 'none';
+                    this.btnDelete.style.display = 'none';
+                break;
+
+                case 1:
+                    this.btnRename.style.display = 'block';
+                    this.btnDelete.style.display = 'block';
+                break;
+
+                default:
+                    this.btnRename.style.display = 'none';
+                    this.btnDelete.style.display = 'block';
+            }
+  
         });
 
         this.btnSendFileEl.addEventListener('click', event=>{
@@ -51,8 +75,6 @@ class DropBoxController {
                 this.uploadTask(event.target.files).then(responses =>{
 
                     responses.forEach(resp =>{
-
-                        console.log(resp.files['input-file']);
 
                         this.getFirebaseRef().push().set(resp.files['input-file']);
 
@@ -365,8 +387,6 @@ class DropBoxController {
 
         li.addEventListener('click', e=>{
    
-            this.listFilesEl.dispatchEvent(this.onSelectionChange);
-
             if (e.shiftKey){
                 let firstLi = this.listFilesEl.querySelector('.selected');
 
@@ -395,6 +415,7 @@ class DropBoxController {
                         }
                    });
 
+                   this.listFilesEl.dispatchEvent(this.onSelectionChange);
                     return true;
                 }
             }
@@ -406,6 +427,8 @@ class DropBoxController {
             }
 
             li.classList.toggle('selected');
+
+            this.listFilesEl.dispatchEvent(this.onSelectionChange);
         });
     }
 }
