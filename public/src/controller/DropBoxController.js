@@ -2,36 +2,84 @@ class DropBoxController {
     
     constructor() {
 
+        this.onSelectionChange = new Event('selectionchange');
+
         this.btnSendFileEl = document.querySelector('#btn-send-file');
         this.inputFileEl = document.querySelector('#files');
         this.snackModalEl = document.querySelector('#react-snackbar-root');
         this.progressBarEl = this.snackModalEl.querySelector('.mc-progress-bar-fg');
         this.fileNameEl = this.snackModalEl.querySelector('.filename');
         this.timeLeftEl = this.snackModalEl.querySelector('.timeleft');
-
+        this.listFilesEl = document.querySelector('#list-of-files-and-directories');
+        this.btnRename = document.querySelector('#btn-rename');
+        this.btnDelete = document.querySelector('#btn-delete');
         this.connectFirebase();
-        this.initEvents()
+        this.initEvents();
+        this.redFiles();
 
     }
 
     connectFirebase(){
-  
-        // Change to your web application's Firebase configuration
+        /*////////////////////////////////////////////////////////////
+            Change to your web application's Firebase configuration
+        */////////////////////////////////////////////////////////////
         var firebaseConfig = {
-            apiKey: "AIzaSyCPBYZGhuuk2ufQ0McIZPl3vUyMgNM_buo",
-            authDomain: "dropbox-clone-c113b.firebaseapp.com",
-            databaseURL: "https://dropbox-clone-c113b.firebaseio.com",
-            projectId: "dropbox-clone-c113b",
-            storageBucket: "dropbox-clone-c113b.appspot.com",
-            messagingSenderId: "504059448644",
-            appId: "1:504059448644:web:4ddb02e38491f1e1a85b11"
+            apiKey: "AIzaSyATSgNwKUNUtQfxZ5AFrx-2czCeWCCqGJU",
+            authDomain: "dropbox-clone-f86cf.firebaseapp.com",
+            databaseURL: "https://dropbox-clone-f86cf.firebaseio.com",
+            projectId: "dropbox-clone-f86cf",
+            storageBucket: "dropbox-clone-f86cf.appspot.com",
+            messagingSenderId: "57159716645",
+            appId: "1:57159716645:web:c2bc7adbf73a14c6e614cc"
         };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
 
     }
 
+    getSelection(){
+
+        return this.listFilesEl.querySelectorAll('.selected');
+
+    }
+
     initEvents(){
+        
+        this.btnRename.addEventListener('click', e=>{
+
+            let li = this.getSelection()[0];  
+            let file = JSON.parse(li.dataset.file);
+
+            let name = prompt("Renomear o arquivo", file.name);
+
+            if (name) {
+
+                file.name = name;
+                this.getFirebaseRef().child(li.dataset.key).set(file);
+            }
+            
+        });
+
+        this.listFilesEl.addEventListener('selectionchange', e=>{
+
+            switch (this.getSelection().length){
+               
+                case 0:
+                    this.btnRename.style.display = 'none';
+                    this.btnDelete.style.display = 'none';
+                break;
+
+                case 1:
+                    this.btnRename.style.display = 'block';
+                    this.btnDelete.style.display = 'block';
+                break;
+
+                default:
+                    this.btnRename.style.display = 'none';
+                    this.btnDelete.style.display = 'block';
+            }
+  
+        });
 
         this.btnSendFileEl.addEventListener('click', event=>{
 
@@ -43,8 +91,6 @@ class DropBoxController {
                 this.uploadTask(event.target.files).then(responses =>{
 
                     responses.forEach(resp =>{
-
-                        console.log(resp.files['input-file']);
 
                         this.getFirebaseRef().push().set(resp.files['input-file']);
 
@@ -319,13 +365,88 @@ class DropBoxController {
         }
     }
 
-    getFileView(file){
+    getFileView(file, key){
 
-        return `
-            <li>
-                ${this.getFileIconView(file)}
-                <div class="name text-center">${file.name}</div>
-            </li>
+        let li = document.createElement('li');
+        li.dataset.key = key;
+        li.dataset.file = JSON.stringify(file);
+
+
+        li.innerHTML = `
+            ${this.getFileIconView(file)}
+            <div class="name text-center">${file.name}</div>
         `;
+
+        this.initEventsLi(li);
+
+        return li;
+
+    }
+
+    redFiles(){
+
+        this.getFirebaseRef().on('value', snapshot =>{
+
+            this.listFilesEl.innerHTML = '';
+
+            snapshot.forEach(snapshotItem => {
+
+               let key = snapshotItem.key;
+               let data = snapshotItem.val();
+               
+               this.listFilesEl.appendChild(this.getFileView(data, key));
+
+            });
+
+        });
+    }
+
+    initEventsLi(li){
+
+        li.addEventListener('click', e=>{
+   
+            if (e.shiftKey){
+                let firstLi = this.listFilesEl.querySelector('.selected');
+
+                if (firstLi){
+
+                    let indexStart;
+                    let indexEnd;
+                    let lis = li.parentElement.childNodes;
+
+                    lis.forEach((el, index) => {
+
+                        if (firstLi === el){
+                            indexStart = index;
+                        }
+                        if (li === el) {
+                            indexEnd = index;
+                        } 
+                   });
+
+                   let index = [indexStart, indexEnd].sort();
+
+                   lis.forEach((el, i) => {
+
+                        if (i >= index[0] && i <= index[1] ) {
+                            el.classList.add('selected');
+                        }
+                   });
+
+                   this.listFilesEl.dispatchEvent(this.onSelectionChange);
+                    return true;
+                }
+            }
+
+            if (!e.ctrlKey){
+                this.listFilesEl.querySelectorAll('li.selected').forEach(el=>{
+                    el.classList.remove('selected');
+                });
+            }
+
+            li.classList.toggle('selected');
+
+            this.listFilesEl.dispatchEvent(this.onSelectionChange);
+        });
     }
 }
